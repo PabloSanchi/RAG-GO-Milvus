@@ -10,55 +10,112 @@ import (
 	"log"
 )
 
+const (
+    MilvusAddress = "localhost:19530"
+)
+
 type DatastoreMilvus struct {
-	ID          string
-	Title       string
-	Content		string
-	Category	string
-	Embedding	[]float32
+    ID        string
+    Title     string
+    Content   string
+    Category  string
+    Embedding []float32
 }
 
-type DatastoreListMilvus []DatastoreMilvus
-
-
 func (dsm *DatastoreMilvus) ToDomain() *domain.Document {
-	return &domain.Document{
-		ID: dsm.ID,
-		Title: dsm.Title,
-		Content: dsm.Content,
-		Category: dsm.Category,
-	}
+    return &domain.Document{
+        ID:       dsm.ID,
+        Title:    dsm.Title,
+        Content:  dsm.Content,
+        Category: dsm.Category,
+    }
 }
 
 func (dsm *DatastoreMilvus) FromDomain(document *domain.Document) {
-	if dsm == nil {
-		dsm = &DatastoreMilvus{}
-	}
-
-	dsm.ID = document.ID
-	dsm.Title = document.Title
-	dsm.Content = document.Content
-	dsm.Category = document.Category
-	dsm.Embedding = []float32{} // here goes the embedding
+    dsm.ID = document.ID
+    dsm.Title = document.Title
+    dsm.Content = document.Content
+    dsm.Category = document.Category
 }
 
-var milvusClient, _ = client.NewClient(context.Background(), client.Config{
-	Address: "localhost:19530",
-})
+var milvusClient, _ = client.NewClient(context.Background(), client.Config{Address: MilvusAddress})
 
-type DatastoreMilvusRepository struct {
-	
-}
+type DatastoreMilvusRepository struct{}
 
 func NewDatastoreMilvusRepository() ports.DatastoreRepository {
-	return &DatastoreMilvusRepository{
-		
-	}
+    return &DatastoreMilvusRepository{}
 }
 
 func (m *DatastoreMilvusRepository) CreateCollection(collectionName string) error {
+    schema := defineSchema(collectionName)
+    if err := milvusClient.CreateCollection(context.Background(), schema, entity.DefaultShardNumber); err != nil {
+        return fmt.Errorf("failed to create collection: %w", err)
+    }
 
-	schema := &entity.Schema{
+    if err := buildIndex(collectionName); err != nil {
+        return fmt.Errorf("failed to build index: %w", err)
+    }
+
+    log.Println("Collection created successfully")
+    return nil
+}
+
+func (m *DatastoreMilvusRepository) DeleteCollection(collectionName string) error {
+    if err := milvusClient.DropCollection(context.Background(), collectionName); err != nil {
+        return fmt.Errorf("failed to drop collection: %w", err)
+    }
+
+    log.Println("Collection dropped successfully")
+    return nil
+}
+
+func (m *DatastoreMilvusRepository) List() ([]string, error) {
+    listColl, err := milvusClient.ListCollections(context.Background())
+    if err != nil {
+        return nil, fmt.Errorf("failed to list collections: %w", err)
+    }
+
+    var collections []string
+    for _, collection := range listColl {
+        collections = append(collections, collection.Name)
+    }
+
+    log.Println("Collections listed successfully")
+    return collections, nil
+}
+
+func (m *DatastoreMilvusRepository) UpsertDocuments(collectionName string, documents []domain.Document) error {
+	fmt.Println("Upserting documents", collectionName)
+
+	for _, document := range documents {
+		fmt.Println(document.String())
+	}
+
+	return nil
+}
+
+func (m *DatastoreMilvusRepository) Search(collectionName string, query string) ([]domain.Document, error) {
+	fmt.Printf("Searching documents in collection %s with query %s", collectionName, query)
+	return []domain.Document{}, nil
+}
+
+// private
+func buildIndex(collectionName string) error {
+    idx, err := entity.NewIndexIvfFlat(entity.COSINE, 1024)
+    if err != nil {
+        return fmt.Errorf("fail to create IVF flat index parameter: %w", err)
+    }
+
+    err = milvusClient.CreateIndex(context.Background(), collectionName, "embedding", idx, false)
+    if err != nil {
+        return fmt.Errorf("fail to create index: %w", err)
+    }
+
+    return nil
+}
+
+func defineSchema(collectionName string) *entity.Schema {
+	return &entity.Schema{
 		CollectionName: collectionName,
 		Description:    "",
 		AutoID:         false,
@@ -108,102 +165,4 @@ func (m *DatastoreMilvusRepository) CreateCollection(collectionName string) erro
 			},
 		},
 	}
-
-	err := milvusClient.CreateCollection(
-		context.Background(),
-		schema,
-		entity.DefaultShardNumber,
-	)
-
-	if err != nil {
-		log.Fatal("failed to create collection:", err.Error())
-		return err
-	}
-
-	err = buildIndex(collectionName)
-
-	if err != nil {
-		log.Fatal("failed to build index:", err.Error())
-		return err
-	}
-
-	log.Println("collection created successfully")
-	
-	return nil
-}
-
-func (m *DatastoreMilvusRepository) DeleteCollection(collectionName string) error {
-	
-	err := milvusClient.DropCollection(
-		context.Background(),
-		collectionName,
-	)
-	
-	if err != nil {
-		log.Fatal("fail to drop collection:", err.Error())
-	}
-
-	log.Println("collection dropped successfully")
-
-	return nil
-}
-
-func (m *DatastoreMilvusRepository) List() ([]string, error) {
-
-	listColl, err := milvusClient.ListCollections(context.Background(),)
-	if err != nil {
-		return nil, err
-	}
-
-	var collections []string
-	for _, collection := range listColl {
-		collections = append(collections, collection.Name)
-	}
-
-	log.Println("collections listed successfully")
-
-	return collections, nil
-}
-
-func (m *DatastoreMilvusRepository) UpsertDocuments(collectionName string, documents []domain.Document) error {
-	fmt.Println("Upserting documents", collectionName)
-
-	for _, document := range documents {
-		fmt.Println(document.String())
-	}
-
-	return nil
-}
-
-func (m *DatastoreMilvusRepository) Search(collectionName string, query string) ([]domain.Document, error) {
-	fmt.Printf("Searching documents in collection %s with query %s", collectionName, query)
-	return []domain.Document{}, nil
-}
-
-// private
-func buildIndex(collectionName string) error {
-	idx, err := entity.NewIndexIvfFlat(
-		entity.COSINE,
-		1024,
-	)
-
-	if err != nil {
-	  log.Fatal("fail to create ivf flat index parameter:", err.Error())
-	  return err
-	}
-
-	err = milvusClient.CreateIndex(
-		context.Background(),
-		collectionName,
-		"embedding",
-		idx,
-		false,
-	)
-	
-	if err != nil {
-		log.Fatal("fail to create index:", err.Error())
-		return err
-	}
-
-	return nil
 }
