@@ -10,31 +10,42 @@ import (
 	"github.com/pablosanchi/datastore/repositories/datastore"
 	"github.com/pablosanchi/datastore/handler"
 	restful "github.com/emicklei/go-restful/v3"
+	"github.com/emicklei/go-restful-openapi/v2"
 )
 
 var(
-	binding string
+	hostname string
+	port string
 )
 
-func init() {
-	flag.StringVar(&binding, "binding", "localhost:8080", "Binding address")
-	flag.Parse()
-}
-
 func main() {
-	fmt.Println("Initializing server...")
+	flag.StringVar(&hostname, "hostname", "localhost", "hostname address")
+	flag.StringVar(&port, "port", "8080", "Port to bind")
+	flag.Parse()
+
+	address := fmt.Sprintf("%s:%s", hostname, port)
 
 	var datastoreRepository ports.DatastoreRepository = datastore.NewDatastoreMilvusRepository()
-	
 	datastoreService := services.NewDatastoreService(datastoreRepository)
 	
 	ws := new(restful.WebService)
 	ws.Path("/api")
+
 	handler.NewDatastoreHandler(datastoreService, ws)
 	restful.Add(ws)
 
-	fmt.Println("Listening on", binding)
-	if err := http.ListenAndServe(binding, restful.DefaultContainer); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
+	// Swagger JSON
+	config := restfulspec.Config{
+		WebServices:    restful.DefaultContainer.RegisteredWebServices(),
+		WebServicesURL: fmt.Sprintf("http://%s:%s", hostname, port),
+		APIPath:        "/apidocs.json",
+	}
+
+	restful.DefaultContainer.Add(restfulspec.NewOpenAPIService(config))
+
+
+	log.Println("Listening on", address)
+	if err := http.ListenAndServe(address, nil); err != nil {
+		log.Fatalf("Failed to start server: %v",  	 err)
 	}
 }
