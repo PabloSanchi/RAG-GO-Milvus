@@ -76,7 +76,7 @@ func (m *DatastoreMilvusRepository) UpsertDocuments(collectionName string, docum
 		encodedContent, err := m.encoder.Encode(document.Content)
 
 		if err != nil {
-			log.Fatal("fail to encode content:", err.Error())
+			return fmt.Errorf("fail to encode content: %w", err.Error())
 		}
 		
 		idList = append(idList, document.ID)
@@ -104,7 +104,7 @@ func (m *DatastoreMilvusRepository) UpsertDocuments(collectionName string, docum
 	);
 
 	err != nil {
-			log.Fatalf("failed to upsert data, err: %v", err)
+		return fmt.Errorf("fail to upsert data, err: %w", err.Error())
 	}
 
 	return nil

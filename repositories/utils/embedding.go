@@ -33,7 +33,6 @@ func (e *Encoder) Encode(text string) ([]float32, error) {
     requestBody := bytes.NewBuffer(postBody)
     resp, err := http.Post(ENDPOINT, "application/json", requestBody)
     if err != nil {
-        log.Printf("Embedding error: %v", err)
         return nil, err
     }
     defer resp.Body.Close()
@@ -47,7 +46,6 @@ func (e *Encoder) Encode(text string) ([]float32, error) {
     var embeddingResponse EmbeddingResponse
     err = json.Unmarshal(body, &embeddingResponse)
     if err != nil {
-        log.Printf("Unmarshal error: %v", err)
         return nil, err
     }
 
