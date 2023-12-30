@@ -8,30 +8,23 @@ import (
 	"github.com/milvus-io/milvus-sdk-go/v2/entity"
 	"fmt"
 	"context"
-	"log"
-)
-
-const (
-    MilvusAddress = "localhost:19530"
 )
 
 type DatastoreMilvusRepository struct{
-	client client.Client
-	encoder secondary.TextEncoder
+	Client client.Client
+	Encoder secondary.TextEncoder
 }
 
-func NewDatastoreMilvusRepository(encoder secondary.TextEncoder) ports.DatastoreRepository {
-    milvusClient, err := client.NewClient(context.Background(), client.Config{Address: MilvusAddress})
-	if err != nil {
-		log.Fatal("Failed to connect to Milvus:", err)
+func NewDatastoreMilvusRepository(milvusClient client.Client, encoder secondary.TextEncoder) ports.DatastoreRepository {
+	return &DatastoreMilvusRepository{
+		Client: milvusClient, 
+		Encoder: encoder,
 	}
-
-	return &DatastoreMilvusRepository{client: milvusClient, encoder: encoder}
 }
 
 func (m *DatastoreMilvusRepository) CreateCollection(collectionName string) error {
     schema := defineSchema(collectionName)
-    if err := m.client.CreateCollection(context.Background(), schema, entity.DefaultShardNumber); err != nil {
+    if err := m.Client.CreateCollection(context.Background(), schema, entity.DefaultShardNumber); err != nil {
         return fmt.Errorf("failed to create collection: %w", err)
     }
 
@@ -43,7 +36,7 @@ func (m *DatastoreMilvusRepository) CreateCollection(collectionName string) erro
 }
 
 func (m *DatastoreMilvusRepository) DeleteCollection(collectionName string) error {
-    if err := m.client.DropCollection(context.Background(), collectionName); err != nil {
+    if err := m.Client.DropCollection(context.Background(), collectionName); err != nil {
         return fmt.Errorf("failed to drop collection: %w", err)
     }
 
@@ -51,7 +44,7 @@ func (m *DatastoreMilvusRepository) DeleteCollection(collectionName string) erro
 }
 
 func (m *DatastoreMilvusRepository) List() ([]string, error) {
-    listColl, err := m.client.ListCollections(context.Background())
+    listColl, err := m.Client.ListCollections(context.Background())
     if err != nil {
         return nil, fmt.Errorf("failed to list collections: %w", err)
     }
@@ -73,7 +66,7 @@ func (m *DatastoreMilvusRepository) UpsertDocuments(collectionName string, docum
 	embeddingList := make([][]float32, 0, nEntities)
 
 	for _, document := range documents {
-		encodedContent, err := m.encoder.Encode(document.Content)
+		encodedContent, err := m.Encoder.Encode(document.Content)
 
 		if err != nil {
 			return fmt.Errorf("fail to encode content: %w", err)
@@ -92,7 +85,7 @@ func (m *DatastoreMilvusRepository) UpsertDocuments(collectionName string, docum
 	categoryColumn := entity.NewColumnVarChar("category", categoryList)
 	embeddingColumn := entity.NewColumnFloatVector("embedding", 4096, embeddingList)
 
-	if _, err := m.client.Upsert(
+	if _, err := m.Client.Upsert(
 		context.Background(), 
 		collectionName, 
 		"",
@@ -112,13 +105,13 @@ func (m *DatastoreMilvusRepository) UpsertDocuments(collectionName string, docum
 
 func (m *DatastoreMilvusRepository) Search(collectionName string, query string) ([]domain.Document, error) {
 
-	encodedQuery, err := m.encoder.Encode(query)
+	encodedQuery, err := m.Encoder.Encode(query)
 
 	if err != nil {
 		return nil, fmt.Errorf("fail to encode query: %w", err)
 	}
 
-	if err := m.client.LoadCollection(context.Background(), collectionName, false, ); err != nil {
+	if err := m.Client.LoadCollection(context.Background(), collectionName, false, ); err != nil {
 		return nil, fmt.Errorf("failed to load collection: %w", err)
 	}
 
@@ -131,7 +124,7 @@ func (m *DatastoreMilvusRepository) Search(collectionName string, query string) 
 		option.IgnoreGrowing = false
 	})
 
-	searchResult, err := m.client.Search(
+	searchResult, err := m.Client.Search(
 		context.Background(),
 		collectionName,
 		[]string{},
@@ -169,7 +162,7 @@ func (m *DatastoreMilvusRepository) Search(collectionName string, query string) 
 		})
 	}
 	
-	err = m.client.ReleaseCollection(
+	err = m.Client.ReleaseCollection(
 		context.Background(),                            // ctx
 		collectionName,                                   // CollectionName
 	)
@@ -187,7 +180,7 @@ func (m *DatastoreMilvusRepository) buildIndex(collectionName string) error {
         return fmt.Errorf("fail to create IVF flat index parameter: %w", err)
     }
 
-    err = m.client.CreateIndex(context.Background(), collectionName, "embedding", idx, false)
+    err = m.Client.CreateIndex(context.Background(), collectionName, "embedding", idx, false)
     if err != nil {
         return fmt.Errorf("fail to create index: %w", err)
     }

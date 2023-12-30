@@ -11,6 +11,7 @@ import (
 	"github.com/pablosanchi/datastore/core/services"
 	"github.com/pablosanchi/datastore/repositories/datastore"
 	"github.com/pablosanchi/datastore/handler"
+	"github.com/pablosanchi/datastore/helpers"
 	restful "github.com/emicklei/go-restful/v3"
 	"github.com/emicklei/go-restful-openapi/v2"
 )
@@ -28,7 +29,8 @@ func main() {
 	address := fmt.Sprintf("%s:%s", hostname, port)
 
 	var encoder secondary.TextEncoder = utils.NewEncoder()
-	var datastoreRepository ports.DatastoreRepository = datastore.NewDatastoreMilvusRepository(encoder)
+	var datastoreRepository ports.DatastoreRepository = datastore.NewDatastoreMilvusRepository(helpers.NewMilvusClient(), encoder)
+
 	datastoreService := services.NewDatastoreService(datastoreRepository)
 	
 	ws := new(restful.WebService)
