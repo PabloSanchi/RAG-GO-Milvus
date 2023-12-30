@@ -9,7 +9,7 @@ import (
     "github.com/pablosanchi/datastore/core/ports/secondary"
 )
 
-var (
+const (
     ENDPOINT string = "http://localhost:11434/api/embeddings"
     MODEL    string = "mistral"
 )
