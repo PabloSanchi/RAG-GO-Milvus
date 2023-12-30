@@ -9,7 +9,7 @@ type Document struct {
 	Category string `json:"category"`
 }
 
-func newDocument(id string, title string, content string, category string) *Document {
+func NewDocument(id string, title string, content string, category string) *Document {
 	return &Document{
 		ID: id,
 		Title: title,
