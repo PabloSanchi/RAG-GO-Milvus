@@ -39,7 +39,6 @@ func (m *DatastoreMilvusRepository) CreateCollection(collectionName string) erro
         return fmt.Errorf("failed to build index: %w", err)
     }
 
-    log.Println("Collection created successfully")
     return nil
 }
 
@@ -48,7 +47,6 @@ func (m *DatastoreMilvusRepository) DeleteCollection(collectionName string) erro
         return fmt.Errorf("failed to drop collection: %w", err)
     }
 
-    log.Println("Collection dropped successfully")
     return nil
 }
 
@@ -63,7 +61,6 @@ func (m *DatastoreMilvusRepository) List() ([]string, error) {
         collections = append(collections, collection.Name)
     }
 
-    log.Println("Collections listed successfully")
     return collections, nil
 }
 
