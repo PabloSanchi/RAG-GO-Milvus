@@ -76,7 +76,7 @@ func (m *DatastoreMilvusRepository) UpsertDocuments(collectionName string, docum
 		encodedContent, err := m.encoder.Encode(document.Content)
 
 		if err != nil {
-			return fmt.Errorf("fail to encode content: %w", err.Error())
+			return fmt.Errorf("fail to encode content: %w", err)
 		}
 		
 		idList = append(idList, document.ID)
@@ -104,7 +104,7 @@ func (m *DatastoreMilvusRepository) UpsertDocuments(collectionName string, docum
 	);
 
 	err != nil {
-		return fmt.Errorf("fail to upsert data, err: %w", err.Error())
+		return fmt.Errorf("fail to upsert data, err: %w", err)
 	}
 
 	return nil
@@ -115,11 +115,11 @@ func (m *DatastoreMilvusRepository) Search(collectionName string, query string) 
 	encodedQuery, err := m.encoder.Encode(query)
 
 	if err != nil {
-		return nil, fmt.Errorf("fail to encode query: %w", err.Error())
+		return nil, fmt.Errorf("fail to encode query: %w", err)
 	}
 
 	if err := m.client.LoadCollection(context.Background(), collectionName, false, ); err != nil {
-		return nil, fmt.Errorf("failed to load collection: %w", err.Error())
+		return nil, fmt.Errorf("failed to load collection: %w", err)
 	}
 
 	sp, _ := entity.NewIndexIvfFlatSearchParam(10,)
@@ -146,7 +146,7 @@ func (m *DatastoreMilvusRepository) Search(collectionName string, query string) 
 	)
 
 	if err != nil {
-		return nil, fmt.Errorf("fail to search collection: %w", err.Error())
+		return nil, fmt.Errorf("fail to search collection: %w", err)
 	}
 
 	fields := searchResult[0].Fields
@@ -175,7 +175,7 @@ func (m *DatastoreMilvusRepository) Search(collectionName string, query string) 
 	)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to release collection: %w", err.Error())
+		return nil, fmt.Errorf("failed to release collection: %w", err)
 	}
 
 	return documents, nil
