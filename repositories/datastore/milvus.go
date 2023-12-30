@@ -118,22 +118,14 @@ func (m *DatastoreMilvusRepository) Search(collectionName string, query string) 
 	encodedQuery, err := m.encoder.Encode(query)
 
 	if err != nil {
-		log.Fatal("fail to encode query:", err.Error())
+		return nil, fmt.Errorf("fail to encode query: %w", err.Error())
 	}
 
-	err = m.client.LoadCollection(
-		context.Background(),
-		collectionName,
-		false,
-	)
-
-	if err != nil {
-		log.Fatal("failed to load collection:", err.Error())
+	if err := m.client.LoadCollection(context.Background(), collectionName, false, ); err != nil {
+		return nil, fmt.Errorf("failed to load collection: %w", err.Error())
 	}
 
-	sp, _ := entity.NewIndexIvfFlatSearchParam( // NewIndex*SearchParam func
-		10,                                  // searchParam
-	)
+	sp, _ := entity.NewIndexIvfFlatSearchParam(10,)
 	
 	opt := client.SearchQueryOptionFunc(func(option *client.SearchQueryOption) {
 		option.Limit = 3
@@ -157,7 +149,7 @@ func (m *DatastoreMilvusRepository) Search(collectionName string, query string) 
 	)
 
 	if err != nil {
-		log.Fatal("fail to search collection:", err.Error())
+		return nil, fmt.Errorf("fail to search collection: %w", err.Error())
 	}
 
 	fields := searchResult[0].Fields
@@ -182,11 +174,11 @@ func (m *DatastoreMilvusRepository) Search(collectionName string, query string) 
 	
 	err = m.client.ReleaseCollection(
 		context.Background(),                            // ctx
-		collectionName,                                          // CollectionName
+		collectionName,                                   // CollectionName
 	)
 
 	if err != nil {
-		log.Fatal("failed to release collection:", err.Error())
+		return nil, fmt.Errorf("failed to release collection: %w", err.Error())
 	}
 
 	return documents, nil
