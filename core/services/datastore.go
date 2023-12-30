@@ -27,11 +27,10 @@ func (dsSrv *DatastoreService) List() ([]string, error) {
 	collectionList, err := dsSrv.datastoreRepository.List()
 	
 	if err != nil {
-		return nil, err;
+		return nil, err
 	}
 
 	return collectionList, nil
-
 }
 
 func (dsSrv *DatastoreService) UpsertDocuments(collectionName string, documents []domain.Document) error {
