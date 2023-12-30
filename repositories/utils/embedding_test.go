@@ -29,5 +29,4 @@ func TestEncodeSuccess(t *testing.T) {
 
     info := httpmock.GetCallCountInfo()
 	assert.Equal(t, 1, info["POST "+ utils.ENDPOINT])
-
 }
