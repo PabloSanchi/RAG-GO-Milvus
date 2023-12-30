@@ -20,7 +20,7 @@ My focus is on utilizing the embedding feature of the Mistral model provided by 
 
 ### Project Purpose
 
-The primary aim of this project is educational, focusing on applying hexagonal architecture in software development. This architecture facilitates a modular and maintainable code structure.
+The primary aim of this project is educational, focusing on applying hexagonal architecture in (go)[https://go.dev/]. This architecture facilitates a modular and maintainable code structure.
 
 ## TODO
 - [ ] Dynamic schema
