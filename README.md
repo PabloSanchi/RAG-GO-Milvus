@@ -25,3 +25,4 @@ The primary aim of this project is educational, focusing on applying hexagonal a
 ## TODO
 - [ ] Dynamic schema
 - [ ] Testing
+- [ ] Build Milvus + Ollama with mistal + Go backend with docker
