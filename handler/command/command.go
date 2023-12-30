@@ -9,11 +9,11 @@ type CollectionCommand struct {
 }
 
 type UpsertDocumentsCommand struct {
-	CollectionName string `json:"collection_name"`
-	Documents []domain.Document `json:"documents"`
+	CollectionName	string				`json:"collection_name"`
+	Documents		[]domain.Document	`json:"documents"`
 }
 
 type SearchCommand struct {
-	CollectionName string `json:"collection_name"`
-	Query string `json:"query"`
+	CollectionName	string	`json:"collection_name"`
+	Query 			string	`json:"query"`
 }
