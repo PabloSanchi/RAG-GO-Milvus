@@ -9,7 +9,7 @@ My focus is on utilizing the embedding feature of the Mistral model provided by 
 
 ### About Milvus Datastore
 
-Milvus is an open-source database specifically tailored for storing and managing embeddings. Embeddings are essentially data transformed into numeric vector formats. This functionality is crucial for enabling semantic search, where we can find data based on its meaning and context.
+[Milvus](https://milvus.io/docs) is an open-source database specifically tailored for storing and managing embeddings. Embeddings are essentially data transformed into numeric vector formats. This functionality is crucial for enabling semantic search, where we can find data based on its meaning and context.
 
 #### Key Functionalities of this project:
 - **Create Collection**: Initiating new data collections.
