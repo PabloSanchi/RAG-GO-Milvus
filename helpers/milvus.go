@@ -7,10 +7,6 @@ import (
 	"os"
 )
 
-// const (
-//     MilvusAddress = "localhost:19530"
-// )
-
 var (
     MilvusAddress = "http://" + os.Getenv("MILVUS_HOST") + ":" + os.Getenv("MILVUS_PORT")
 )
