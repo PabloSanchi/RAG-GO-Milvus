@@ -11,7 +11,7 @@ import (
 )
 
 var (
-    ENDPOINT string = "http://" + os.Getenv("OLLAMA_HOST") + ":" + os.Getenv("OLLAMA_PORT") + os.Getenv("OLLAMA_ENDPOINT") //  /api/embeddings"
+    ENDPOINT string = "http://" + os.Getenv("OLLAMA_HOST") + ":" + os.Getenv("OLLAMA_PORT") + os.Getenv("OLLAMA_ENDPOINT")
     MODEL    string = "mistral"
 )
 
