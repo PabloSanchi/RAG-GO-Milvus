@@ -14,6 +14,7 @@ import (
 	"github.com/pablosanchi/datastore/helpers"
 	restful "github.com/emicklei/go-restful/v3"
 	"github.com/emicklei/go-restful-openapi/v2"
+	env "github.com/joho/godotenv"
 )
 
 var(
@@ -22,7 +23,9 @@ var(
 )
 
 func main() {
-	flag.StringVar(&hostname, "hostname", "localhost", "hostname address")
+	env.Load()
+
+	flag.StringVar(&hostname, "hostname", "0.0.0.0", "hostname address")
 	flag.StringVar(&port, "port", "8080", "Port to bind")
 	flag.Parse()
 

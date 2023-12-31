@@ -4,10 +4,15 @@ import (
 	"github.com/milvus-io/milvus-sdk-go/v2/client"
 	"context"
 	"log"
+	"os"
 )
 
-const (
-    MilvusAddress = "localhost:19530"
+// const (
+//     MilvusAddress = "localhost:19530"
+// )
+
+var (
+    MilvusAddress = "http://" + os.Getenv("MILVUS_HOST") + ":" + os.Getenv("MILVUS_PORT")
 )
 
 func NewMilvusClient() client.Client {

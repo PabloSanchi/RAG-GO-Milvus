@@ -7,10 +7,11 @@ import (
     "log"
     "net/http"
     "github.com/pablosanchi/datastore/core/ports/secondary"
+    "os"
 )
 
-const (
-    ENDPOINT string = "http://localhost:11434/api/embeddings"
+var (
+    ENDPOINT string = "http://" + os.Getenv("OLLAMA_HOST") + ":" + os.Getenv("OLLAMA_PORT") + os.Getenv("OLLAMA_ENDPOINT") //  /api/embeddings"
     MODEL    string = "mistral"
 )
 
