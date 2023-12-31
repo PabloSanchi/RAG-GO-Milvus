@@ -3,3 +3,5 @@
 volumes/
 *.zip
 swaggerui/
+data.json
+doc/
