@@ -1,0 +1,19 @@
+FROM golang:latest
+
+WORKDIR /app
+
+COPY go.mod .
+COPY go.sum .
+
+RUN go mod download
+
+COPY core/ ./core/
+COPY handler/ ./handler/
+COPY helpers/ ./helpers/
+COPY repositories/ ./repositories/
+COPY .env .
+COPY main.go .
+
+RUN go build -o backend .
+
+CMD ["./backend"]
