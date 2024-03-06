@@ -100,7 +100,7 @@ services:
       - milvus
       - ollama
     environment:
-      - MILVUS_HOST=standalone
+      - MILVUS_HOST=milvus
       - MILVUS_PORT=19530
       - OLLAMA_HOST=ollama
       - OLLAMA_PORT=11434
